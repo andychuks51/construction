@@ -3,23 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Construction Project Gantt Chart</title>
+    <title>Construction Gantt Chart - Duplex Conversion Project</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
         
         .container {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
         
         .header {
@@ -32,527 +38,491 @@
         .header h1 {
             color: #2c3e50;
             font-size: 2.5em;
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
         
         .project-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
             padding: 20px;
             background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-            border-radius: 10px;
+            border-radius: 15px;
+            border-left: 5px solid #28a745;
         }
         
         .info-item {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
         }
         
         .info-label {
             font-weight: bold;
             color: #495057;
-            min-width: 120px;
+            font-size: 0.9em;
+            margin-bottom: 5px;
         }
         
         .info-value {
-            color: #6c757d;
+            color: #2c3e50;
+            font-size: 1.1em;
         }
         
         .gantt-container {
             overflow-x: auto;
-            overflow-y: visible;
-            background: white;
-            border-radius: 10px;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
-            padding: 20px;
+            margin-top: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         
         .gantt-chart {
             min-width: 1200px;
-            position: relative;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
         }
         
         .timeline-header {
             display: grid;
-            grid-template-columns: 250px repeat(auto-fit, minmax(80px, 1fr));
-            gap: 1px;
-            margin-bottom: 10px;
-            background: #667eea;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .header-cell {
-            padding: 15px 10px;
+            grid-template-columns: 300px repeat(auto-fit, minmax(80px, 1fr));
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             font-weight: bold;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .timeline-header div {
+            padding: 10px;
             text-align: center;
-            font-size: 0.9em;
+            border-right: 1px solid rgba(255,255,255,0.2);
         }
         
-        .task-name-header {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            padding-left: 20px;
+        .timeline-header div:first-child {
             text-align: left;
+            padding-left: 20px;
+            background: rgba(0,0,0,0.1);
         }
         
-        .gantt-row {
+        .task-row {
             display: grid;
-            grid-template-columns: 250px repeat(auto-fit, minmax(80px, 1fr));
-            gap: 1px;
-            margin-bottom: 2px;
-            min-height: 50px;
-            border-radius: 5px;
-            overflow: hidden;
-            transition: transform 0.2s ease;
+            grid-template-columns: 300px repeat(auto-fit, minmax(80px, 1fr));
+            border-bottom: 1px solid #e9ecef;
+            transition: all 0.3s ease;
         }
         
-        .gantt-row:hover {
+        .task-row:hover {
+            background: rgba(102, 126, 234, 0.05);
             transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
         .task-name {
             padding: 15px 20px;
-            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
-            color: #2c3e50;
+            background: #f8f9fa;
+            border-right: 2px solid #dee2e6;
             font-weight: 600;
+            color: #495057;
             display: flex;
             align-items: center;
-            border-left: 4px solid #3498db;
         }
         
         .task-cell {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
+            padding: 5px;
+            border-right: 1px solid #e9ecef;
             position: relative;
+            min-height: 50px;
             display: flex;
             align-items: center;
-            justify-content: center;
         }
         
         .task-bar {
-            height: 30px;
+            height: 25px;
             border-radius: 15px;
             position: relative;
-            margin: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
             font-size: 0.8em;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
+            margin: 2px 0;
         }
         
         .task-bar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
         
-        .block-work { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-        .plastering { background: linear-gradient(135deg, #f39c12, #e67e22); }
-        .plumbing { background: linear-gradient(135deg, #3498db, #2980b9); }
-        .electrical { background: linear-gradient(135deg, #f1c40f, #f39c12); }
-        .pop-installation { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
-        .screeding { background: linear-gradient(135deg, #1abc9c, #16a085); }
-        .tiling { background: linear-gradient(135deg, #34495e, #2c3e50); }
-        .debris-clearing { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
-        .sand-moving { background: linear-gradient(135deg, #d35400, #e67e22); }
+        .block-work { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        .plastering { background: linear-gradient(45deg, #3498db, #2980b9); }
+        .plumbing { background: linear-gradient(45deg, #1abc9c, #16a085); }
+        .electrical { background: linear-gradient(45deg, #f39c12, #e67e22); }
+        .pop { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+        .screeding { background: linear-gradient(45deg, #34495e, #2c3e50); }
+        .tiling { background: linear-gradient(45deg, #27ae60, #229954); }
+        .debris { background: linear-gradient(45deg, #95a5a6, #7f8c8d); }
+        .sand { background: linear-gradient(45deg, #d35400, #a04000); }
         
         .progress-indicator {
             position: absolute;
-            top: 2px;
-            right: 5px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #2c3e50;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 0.7em;
-            font-weight: bold;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            border-radius: 2px;
+            transition: width 0.3s ease;
         }
         
         .legend {
-            margin-top: 30px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
+            margin-top: 30px;
             padding: 20px;
             background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-            border-radius: 10px;
+            border-radius: 15px;
         }
         
         .legend-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         .legend-color {
             width: 20px;
             height: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
+        .milestone {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24) !important;
+            border-radius: 50% !important;
+            width: 30px !important;
+            height: 30px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 0.7em !important;
+            margin: 0 auto !important;
         }
         
-        .stat-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transform: perspective(1000px) rotateX(5deg);
-            transition: transform 0.3s ease;
+        .critical-path {
+            border: 3px solid #ff4757 !important;
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.5) !important;
         }
         
-        .stat-card:hover {
-            transform: perspective(1000px) rotateX(0deg) scale(1.05);
-        }
-        
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .stat-label {
-            font-size: 1.1em;
-            opacity: 0.9;
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .project-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .gantt-chart {
+                min-width: 800px;
+            }
+            
+            .timeline-header {
+                grid-template-columns: 200px repeat(auto-fit, minmax(60px, 1fr));
+            }
+            
+            .task-row {
+                grid-template-columns: 200px repeat(auto-fit, minmax(60px, 1fr));
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏗️ Residential Duplex Construction Project</h1>
+            <h1>🏗️ Construction Gantt Chart</h1>
+            <p>Residential Duplex Conversion and Expansion Project</p>
         </div>
         
         <div class="project-info">
             <div class="info-item">
-                <span class="info-label">📋 Project:</span>
-                <span class="info-value">Duplex to 10-Flat + 2-Room Conversion</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">👷 Manager:</span>
+                <span class="info-label">Project Manager</span>
                 <span class="info-value">Bldr. Andrew</span>
             </div>
             <div class="info-item">
-                <span class="info-label">📍 Location:</span>
+                <span class="info-label">Location</span>
                 <span class="info-value">Ogombo Road, Lekki Peninsula</span>
             </div>
             <div class="info-item">
-                <span class="info-label">📅 Duration:</span>
+                <span class="info-label">Project Type</span>
+                <span class="info-value">Duplex to 10-Flat + 2-Room Conversion</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Timeline</span>
                 <span class="info-value">April 7 - May 31, 2025</span>
             </div>
         </div>
         
         <div class="gantt-container">
-            <div class="gantt-chart">
-                <div class="timeline-header">
-                    <div class="header-cell task-name-header">Task Description</div>
-                    <div class="header-cell">Apr 7-12</div>
-                    <div class="header-cell">Apr 14-19</div>
-                    <div class="header-cell">May 12-24</div>
-                    <div class="header-cell">May 26-31</div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🧱 Block Work - Ground Floor</div>
-                    <div class="task-cell">
-                        <div class="task-bar block-work">
-                            90-98%
-                            <div class="progress-indicator">95%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar block-work">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🧱 Block Work - Upper Floors</div>
-                    <div class="task-cell">
-                        <div class="task-bar block-work">
-                            95-98%
-                            <div class="progress-indicator">96%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar block-work">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🎨 Plastering Work - Block A</div>
-                    <div class="task-cell">
-                        <div class="task-bar plastering">
-                            95-100%
-                            <div class="progress-indicator">98%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar plastering">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🎨 Plastering Work - Block B</div>
-                    <div class="task-cell">
-                        <div class="task-bar plastering">
-                            98-100%
-                            <div class="progress-indicator">99%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar plastering">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🚰 Plumbing Work - All Areas</div>
-                    <div class="task-cell">
-                        <div class="task-bar plumbing">
-                            30-70%
-                            <div class="progress-indicator">50%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar plumbing">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">⚡ Electrical Work - All Blocks</div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell">
-                        <div class="task-bar electrical">
-                            60-100%
-                            <div class="progress-indicator">85%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar electrical">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🎭 POP Installation</div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell">
-                        <div class="task-bar pop-installation">
-                            30-100%
-                            <div class="progress-indicator">80%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🏗️ Wall Screeding - Block A</div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell">
-                        <div class="task-bar screeding">
-                            60-100%
-                            <div class="progress-indicator">85%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🏗️ Wall Screeding - Block B</div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell">
-                        <div class="task-bar screeding">
-                            40-100%
-                            <div class="progress-indicator">75%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar screeding">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🔧 Wall Opening Patching</div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell">
-                        <div class="task-bar block-work">
-                            60-100%
-                            <div class="progress-indicator">85%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell"></div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🏺 Tiling Work - Block A</div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell">
-                        <div class="task-bar tiling">
-                            80-100%
-                            <div class="progress-indicator">90%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar tiling">
-                            80-100%
-                            <div class="progress-indicator">95%</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🧹 Debris Clearing</div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell">
-                        <div class="task-bar debris-clearing">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar debris-clearing">
-                            100%
-                            <div class="progress-indicator">✓</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="gantt-row">
-                    <div class="task-name">🏖️ Sand Packing & Moving</div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell"></div>
-                    <div class="task-cell">
-                        <div class="task-bar sand-moving">
-                            60-100%
-                            <div class="progress-indicator">80%</div>
-                        </div>
-                    </div>
-                    <div class="task-cell">
-                        <div class="task-bar sand-moving">
-                            40-100%
-                            <div class="progress-indicator">85%</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="gantt-chart" id="ganttChart">
+                <!-- Chart will be generated by JavaScript -->
             </div>
         </div>
         
         <div class="legend">
-            <h3 style="grid-column: 1 / -1; text-align: center; color: #2c3e50; margin-bottom: 20px;">📋 Task Legend</h3>
             <div class="legend-item">
                 <div class="legend-color block-work"></div>
-                <span>Block Work & Patching</span>
+                <span>Block Work</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color plastering"></div>
-                <span>Plastering Work</span>
+                <span>Plastering</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color plumbing"></div>
-                <span>Plumbing Installation</span>
+                <span>Plumbing</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color electrical"></div>
                 <span>Electrical Work</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color pop-installation"></div>
+                <div class="legend-color pop"></div>
                 <span>POP Installation</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color screeding"></div>
-                <span>Wall Screeding</span>
+                <span>Screeding</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color tiling"></div>
                 <span>Tiling Work</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color debris-clearing"></div>
+                <div class="legend-color debris"></div>
                 <span>Debris Clearing</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color sand-moving"></div>
+                <div class="legend-color sand"></div>
                 <span>Sand Moving</span>
             </div>
         </div>
-        
-        <div class="summary-stats">
-            <div class="stat-card">
-                <div class="stat-number">54</div>
-                <div class="stat-label">Total Days</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">9</div>
-                <div class="stat-label">Task Categories</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">2</div>
-                <div class="stat-label">Building Blocks</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">85%</div>
-                <div class="stat-label">Overall Progress</div>
-            </div>
-        </div>
     </div>
+
+    <script>
+        // Project data extracted from the construction reports
+        const projectData = {
+            tasks: [
+                {
+                    name: "Block Work - Ground Floor",
+                    type: "block-work",
+                    start: "2025-04-07",
+                    end: "2025-04-17",
+                    progress: 100,
+                    critical: true
+                },
+                {
+                    name: "Block Work - Upper Floors",
+                    type: "block-work", 
+                    start: "2025-04-08",
+                    end: "2025-04-19",
+                    progress: 100,
+                    critical: true
+                },
+                {
+                    name: "Plastering - Block A",
+                    type: "plastering",
+                    start: "2025-04-10",
+                    end: "2025-04-19",
+                    progress: 100,
+                    dependencies: ["Block Work - Ground Floor"]
+                },
+                {
+                    name: "Plastering - Block B",
+                    type: "plastering",
+                    start: "2025-04-11",
+                    end: "2025-04-19",
+                    progress: 100,
+                    dependencies: ["Block Work - Upper Floors"]
+                },
+                {
+                    name: "Plumbing Installation",
+                    type: "plumbing",
+                    start: "2025-04-09",
+                    end: "2025-04-17",
+                    progress: 100,
+                    critical: true
+                },
+                {
+                    name: "Electrical Work - Phase 1",
+                    type: "electrical",
+                    start: "2025-04-14",
+                    end: "2025-04-19",
+                    progress: 100,
+                    dependencies: ["Plastering - Block A"]
+                },
+                {
+                    name: "POP Installation",
+                    type: "pop",
+                    start: "2025-05-12",
+                    end: "2025-05-17",
+                    progress: 100,
+                    dependencies: ["Electrical Work - Phase 1"]
+                },
+                {
+                    name: "Screeding Work",
+                    type: "screeding",
+                    start: "2025-05-13",
+                    end: "2025-05-24",
+                    progress: 85,
+                    dependencies: ["POP Installation"]
+                },
+                {
+                    name: "Electrical Work - Phase 2",
+                    type: "electrical",
+                    start: "2025-05-15",
+                    end: "2025-05-17",
+                    progress: 100
+                },
+                {
+                    name: "Tiling Work",
+                    type: "tiling",
+                    start: "2025-05-21",
+                    end: "2025-05-31",
+                    progress: 90,
+                    critical: true,
+                    dependencies: ["Screeding Work"]
+                },
+                {
+                    name: "Debris Clearing",
+                    type: "debris",
+                    start: "2025-05-19",
+                    end: "2025-05-22",
+                    progress: 100
+                },
+                {
+                    name: "Sand Moving & Packing",
+                    type: "sand",
+                    start: "2025-05-20",
+                    end: "2025-05-31",
+                    progress: 95
+                }
+            ],
+            timeline: generateTimeline("2025-04-07", "2025-05-31")
+        };
+
+        function generateTimeline(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const timeline = [];
+            
+            const current = new Date(start);
+            while (current <= end) {
+                const weekStart = new Date(current);
+                timeline.push({
+                    label: `${weekStart.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`,
+                    date: weekStart.toISOString().split('T')[0]
+                });
+                current.setDate(current.getDate() + 7);
+            }
+            
+            return timeline;
+        }
+
+        function renderGanttChart() {
+            const chart = document.getElementById('ganttChart');
+            
+            // Create header
+            const header = document.createElement('div');
+            header.className = 'timeline-header';
+            header.innerHTML = '<div>Task Name</div>' + 
+                projectData.timeline.map(week => `<div>${week.label}</div>`).join('');
+            chart.appendChild(header);
+            
+            // Create task rows
+            projectData.tasks.forEach(task => {
+                const row = document.createElement('div');
+                row.className = 'task-row';
+                
+                const taskName = document.createElement('div');
+                taskName.className = 'task-name';
+                taskName.textContent = task.name;
+                if (task.critical) {
+                    taskName.style.borderLeft = '5px solid #ff4757';
+                    taskName.style.fontWeight = 'bold';
+                }
+                row.appendChild(taskName);
+                
+                // Calculate task position and duration
+                const taskStart = new Date(task.start);
+                const taskEnd = new Date(task.end);
+                const projectStart = new Date(projectData.timeline[0].date);
+                
+                projectData.timeline.forEach((week, index) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'task-cell';
+                    
+                    const weekDate = new Date(week.date);
+                    const nextWeekDate = new Date(weekDate);
+                    nextWeekDate.setDate(nextWeekDate.getDate() + 7);
+                    
+                    // Check if task overlaps with this week
+                    if (taskStart < nextWeekDate && taskEnd >= weekDate) {
+                        const bar = document.createElement('div');
+                        bar.className = `task-bar ${task.type}`;
+                        if (task.critical) {
+                            bar.classList.add('critical-path');
+                        }
+                        
+                        // Calculate bar width and position
+                        const overlapStart = Math.max(taskStart, weekDate);
+                        const overlapEnd = Math.min(taskEnd, nextWeekDate);
+                        const overlapDays = (overlapEnd - overlapStart) / (1000 * 60 * 60 * 24);
+                        const weekDays = 7;
+                        const widthPercent = Math.min(100, (overlapDays / weekDays) * 100);
+                        
+                        bar.style.width = `${widthPercent}%`;
+                        bar.textContent = `${task.progress}%`;
+                        
+                        // Add progress indicator
+                        const progressIndicator = document.createElement('div');
+                        progressIndicator.className = 'progress-indicator';
+                        const progressFill = document.createElement('div');
+                        progressFill.className = 'progress-fill';
+                        progressFill.style.width = `${task.progress}%`;
+                        progressIndicator.appendChild(progressFill);
+                        bar.appendChild(progressIndicator);
+                        
+                        cell.appendChild(bar);
+                    }
+                    
+                    row.appendChild(cell);
+                });
+                
+                chart.appendChild(row);
+            });
+        }
+
+        //Initialise the chart when the page loads
+        document.addEventListener('DOMContentLoaded', renderGanttChart);
+    </script>
 </body>
 </html>
